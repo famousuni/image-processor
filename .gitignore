@@ -76,3 +76,7 @@ typings/
 .fusebox/
 
 /dist
+
+.DS_Store
+
+.idea/
