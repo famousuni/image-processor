@@ -1,5 +1,7 @@
 import supertest from 'supertest'
 import app from '../index'
+import path from 'path'
+import { checkFile } from '../utilities/imageUtils'
 const request = supertest(app)
 
 describe('Testing API Endpoints', () => {
@@ -35,5 +37,13 @@ describe('Testing API Endpoints', () => {
       '/images?filename=fjord.jpg&height=100&width=-100'
     )
     expect(res.status).toBe(400)
+  })
+
+})
+
+describe('Testing Utility Functions', () => {
+  it('checkFile should reject for non existent image', async () => {
+    const filePath = path.join(__dirname, "../../images/full/idontexist.jpg")
+    await expectAsync(checkFile(filePath)).toBeRejected()
   })
 })

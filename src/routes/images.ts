@@ -1,7 +1,7 @@
 import express from 'express'
 import path from 'path'
 import fs from 'fs'
-import { resizeImage } from '../utilities/imageUtils'
+import { resizeImage, checkFile } from '../utilities/imageUtils'
 
 const imageroutes = express.Router()
 
@@ -15,27 +15,20 @@ imageroutes.get('/', async (req, res) => {
     return
   }
 
+
   // Sizing parameters was not provided so return full image
   if (!width && !height) {
-    const p = path.join(__dirname, '../../images/full/')
-    const fullpath = p.concat(filename)
-    //TODO: Add err handling if file doesnt exist
-    res.sendFile(fullpath)
+    const fullPath = path.join(__dirname, '../../images/full/' + filename)
+    try {
+      await checkFile(fullPath)
+    } catch (err) {
+      res.status(404).send(err)
+      return
+    }
+    res.sendFile(fullPath)
     return
-  }
-
-  if (!height) {
-    res.status(400).send('Height parameter was not provided')
-    return
-  }
-
-  if (!width) {
-    res.status(400).send('Width parameter was not provided')
-    return
-  }
-
-  //Filename, Width, and Height parameters are provided
-  if (parseInt(width) > 0 && parseInt(height) > 0) {
+    // Parameters provided so build thumb path
+  } else if (parseInt(width) > 0 && parseInt(height) > 0) {
     const thumbPath = path.join(
       __dirname,
       '../../images/thumb/thumb_' +
@@ -47,12 +40,16 @@ imageroutes.get('/', async (req, res) => {
     )
 
     try {
-      await fs.promises.access(thumbPath)
+      // Check if thumb already exists
+      await checkFile(thumbPath)
     } catch (err) {
+      console.log(`Thumbnail for file ${thumbPath} doesnt exist!`)
+      // Wait for resizing if thumb doesnt exist
       const resizedFile = (await resizeImage(req.query)) as string
       res.status(200).sendFile(resizedFile)
       return
     }
+    // Send back cached thumb if it already exists
     res.sendFile(thumbPath)
   } else {
     res.status(400).send('Invalid value for dimensions')
