@@ -16,7 +16,6 @@ export function resizeImage(query: QueryString.ParsedQs) {
       'thumb_' + width + 'x' + height + '-' + fileName
     )
     const fullPath: string = path.join(__dirname, "../../images/full/" + fileName)
-   // const fullImage = fs.promises.readFile(fullPath)
 
     sharp(fullPath)
       .resize(
