@@ -4,7 +4,6 @@ import QueryString from 'qs'
 import path from 'path'
 import ErrnoException = NodeJS.ErrnoException
 
-
 export function resizeImage(query: QueryString.ParsedQs) {
   return new Promise<string>(function (resolve, reject) {
     const width: string = query['width'] as string
@@ -15,7 +14,10 @@ export function resizeImage(query: QueryString.ParsedQs) {
       '../../images/thumb/',
       'thumb_' + width + 'x' + height + '-' + fileName
     )
-    const fullPath: string = path.join(__dirname, "../../images/full/" + fileName)
+    const fullPath: string = path.join(
+      __dirname,
+      '../../images/full/' + fileName
+    )
 
     sharp(fullPath)
       .resize(
@@ -26,22 +28,18 @@ export function resizeImage(query: QueryString.ParsedQs) {
       .catch((err) => {
         reject(err.message)
       })
-      .then( () => resolve(thumbPath))
-        }
-      )
-  }
+      .then(() => resolve(thumbPath))
+  })
+}
 
-
-
-export function checkFile(
-  filePath: string,
-) {
-  return new Promise<string>(function(resolve, reject) {
-    fs.stat(filePath, function(err: ErrnoException | null) {
+export function checkFile(filePath: string) {
+  return new Promise<string>(function (resolve, reject) {
+    fs.stat(filePath, function (err: ErrnoException | null) {
       if (err) {
-        reject("File Not Found")
+        reject('File Not Found')
       } else {
         resolve(filePath)
       }
     })
-  })}
+  })
+}
