@@ -1,6 +1,5 @@
 import express from 'express'
 import path from 'path'
-import fs from 'fs'
 import { resizeImage, checkFile } from '../utilities/imageUtils'
 
 const imageroutes = express.Router()
@@ -44,12 +43,21 @@ imageroutes.get('/', async (req, res) => {
       await checkFile(thumbPath)
     } catch (err) {
       console.log(`Thumbnail for file ${thumbPath} doesnt exist!`)
-      // Wait for resizing if thumb doesnt exist
-      const resizedFile = (await resizeImage(req.query)) as string
-      res.status(200).sendFile(resizedFile)
+      console.log("Resizing image")
+        await resizeImage(req.query)
+          .then(
+            filePath => {
+              res.sendFile(filePath)
+            }
+          )
+          .catch((err) => {
+            res.status(500).send("Error resizing file")
+          })
       return
+
     }
     // Send back cached thumb if it already exists
+    console.log("Here")
     res.sendFile(thumbPath)
   } else {
     res.status(400).send('Invalid value for dimensions')
