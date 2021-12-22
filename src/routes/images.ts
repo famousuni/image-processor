@@ -1,5 +1,6 @@
 import express from 'express'
 import path from 'path'
+import fs from 'fs'
 import { resizeImage } from '../utilities/imageUtils'
 
 const imageroutes = express.Router()
@@ -11,6 +12,7 @@ imageroutes.get('/', async (req, res) => {
 
   if (!filename) {
     res.status(400).send('Filename not provided')
+    return
   }
 
   // Sizing parameters was not provided so return full image
@@ -23,27 +25,39 @@ imageroutes.get('/', async (req, res) => {
   }
 
   if (!height) {
-    res.status(400).send("Height parameter was not provided")
+    res.status(400).send('Height parameter was not provided')
     return
   }
 
   if (!width) {
-    res.status(400).send("Width parameter was not provided")
+    res.status(400).send('Width parameter was not provided')
     return
   }
 
   //Filename, Width, and Height parameters are provided
   if (parseInt(width) > 0 && parseInt(height) > 0) {
-    //TODO:Check if reized version exists by getting file list and comparing names
-    const resizedFile = await resizeImage(req.query)
-    res.status(200).send(resizedFile)
+    const thumbPath = path.join(
+      __dirname,
+      '../../images/thumb/thumb_' +
+        parseInt(width) +
+        'x' +
+        parseInt(height) +
+        '-' +
+        filename
+    )
+
+    try {
+      await fs.promises.access(thumbPath)
+    } catch (err) {
+      const resizedFile = (await resizeImage(req.query)) as string
+      res.status(200).sendFile(resizedFile)
+      return
+    }
+    res.sendFile(thumbPath)
+  } else {
+    res.status(400).send('Invalid value for dimensions')
     return
   }
-  else {
-    res.status(400).send("Invalid value for dimensions")
-    return
-  }
-
-
 })
+
 export default imageroutes
