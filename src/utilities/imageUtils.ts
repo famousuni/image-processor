@@ -43,3 +43,23 @@ export function checkFile(filePath: string) {
     })
   })
 }
+
+export function checkCreateDir(dirPath: string, folder: string) {
+  return new Promise<string>(function (resolve, reject) {
+    const exist = fs.existsSync(dirPath + folder)
+    if (exist) {
+      resolve('Directory exists')
+    } else {
+      //Create the missing dir
+      console.log('Create dir here')
+      fs.promises
+        .mkdir(dirPath + folder)
+        .catch((err) => {
+          reject(err)
+        })
+        .then(() => {
+          resolve('Directory created')
+        })
+    }
+  })
+}

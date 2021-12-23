@@ -20,14 +20,16 @@ This project allows you to fetch images from the API server. If sizing parameter
 'npm run lint' - This will run eslint and return any linting errors
 
 ## API Usage
+The API server will listen on port 3000.
+
 To get a full sized image
 ```
-GET - http://localhost/images?filename=<image-name.extension>
+GET - http://localhost:3000/images?filename=<image-name.extension>
 ```
 
 To get a resized image
 ```
-GET - http://localhost/images?filename=<image-name.extension>&width=<int>&height=<int>
+GET - http://localhost:3000/images?filename=<image-name.extension>&width=<int>&height=<int>
 ```
 
 ## Contact

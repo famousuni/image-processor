@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import path from 'path'
-import { resizeImage, checkFile } from '../utilities/imageUtils'
+import { resizeImage, checkFile, checkCreateDir } from '../utilities/imageUtils'
 
 const imageroutes = express.Router()
 
@@ -26,6 +26,7 @@ imageroutes.get('/', async (req: Request, res: Response) => {
         res.sendFile(fullPath)
       })
   } else if (parseInt(width) > 0 && parseInt(height) > 0) {
+    const basePath = path.join(__dirname, '../../images/')
     const thumbPath = path.join(
       __dirname,
       '../../images/thumb/thumb_' +
@@ -35,11 +36,18 @@ imageroutes.get('/', async (req: Request, res: Response) => {
         '-' +
         filename
     )
+    // Check if thumb directory exists and create if it doesn't
+    await checkCreateDir(basePath, 'thumb/')
+      .catch((err) => {
+        console.log('checkDir Promise Rejected: ', err)
+      })
+      .then((data) => {
+        console.log('Checkdir Success: ', data)
+      })
     // Check if thumb already exists
     await checkFile(thumbPath)
       .catch(async (err) => {
-        console.log('Error checking file: ', err)
-        console.log(`Thumbnail for file ${thumbPath} doesnt exist!`)
+        console.log(`Error checking file: ${thumbPath} `, err)
         console.log('Resizing image')
         await resizeImage(req.query)
           .then((filePath) => {
