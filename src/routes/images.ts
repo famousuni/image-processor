@@ -17,14 +17,15 @@ imageroutes.get('/', async (req: Request, res: Response) => {
   // Sizing parameters was not provided so return full image
   if (!width && !height) {
     const fullPath = path.join(__dirname, '../../images/full/' + filename)
-    await checkFile(fullPath)
-      .catch((err) => {
-        res.status(404).send(err)
-      })
+    checkFile(fullPath)
       .then(() => {
         console.log('Found full sized file')
         res.sendFile(fullPath)
       })
+      .catch((err) => {
+        res.status(404).send(err)
+      })
+
   } else if (parseInt(width) > 0 && parseInt(height) > 0) {
     const basePath = path.join(__dirname, '../../images/')
     const thumbPath = path.join(
@@ -37,19 +38,24 @@ imageroutes.get('/', async (req: Request, res: Response) => {
         filename
     )
     // Check if thumb directory exists and create if it doesn't
-    await checkCreateDir(basePath, 'thumb/')
-      .catch((err) => {
-        console.log('checkDir Promise Rejected: ', err)
-      })
+    checkCreateDir(basePath, 'thumb/')
       .then((data) => {
         console.log('Checkdir Success: ', data)
       })
+      .catch((err) => {
+        console.log('checkDir Promise Rejected: ', err)
+      })
+
     // Check if thumb already exists
-    await checkFile(thumbPath)
-      .catch(async (err) => {
+    checkFile(thumbPath)
+      .then(() => {
+        // Send back cached thumb if it already exists
+        res.sendFile(thumbPath)
+      })
+      .catch((err) => {
         console.log(`Error checking file: ${thumbPath} `, err)
         console.log('Resizing image')
-        await resizeImage(req.query)
+        resizeImage(req.query)
           .then((filePath) => {
             res.sendFile(filePath)
           })
@@ -57,10 +63,6 @@ imageroutes.get('/', async (req: Request, res: Response) => {
             console.log('Error resizing file: ', err)
             res.status(500).send('Error resizing file')
           })
-      })
-      .then(() => {
-        // Send back cached thumb if it already exists
-        res.sendFile(thumbPath)
       })
   } else {
     res.status(400).send('Invalid value for dimensions')

@@ -5,7 +5,7 @@ import path from 'path'
 import ErrnoException = NodeJS.ErrnoException
 
 export function resizeImage(query: QueryString.ParsedQs) {
-  return new Promise<string>(function (resolve, reject) {
+  return new Promise<string>(async function(resolve, reject) {
     const width: string = query['width'] as string
     const height: string = query['height'] as string
     const fileName: string = query['filename'] as string
@@ -25,10 +25,13 @@ export function resizeImage(query: QueryString.ParsedQs) {
         parseInt(query['height'] as string)
       )
       .toFile(thumbPath)
+      .then(() => {
+        console.log('sharp then')
+        resolve(thumbPath)
+      })
       .catch((err) => {
         reject(err.message)
       })
-      .then(() => resolve(thumbPath))
   })
 }
 
