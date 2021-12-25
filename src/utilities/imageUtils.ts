@@ -48,7 +48,7 @@ export function checkFile(filePath: string) {
 }
 
 export function checkCreateDir(dirPath: string, folder: string) {
-  return new Promise<string>(function (resolve, reject) {
+  return new Promise<string>(async function(resolve, reject) {
     const exist = fs.existsSync(dirPath + folder)
     if (exist) {
       resolve('Directory exists')
